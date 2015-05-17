@@ -29,7 +29,7 @@ describe('flux', () => {
 
       return {
 
-        onAddMessage(content) {
+        addMessage(content) {
           messages = messages.concat(content);
           store.setState({
             messages
@@ -74,7 +74,7 @@ describe('flux', () => {
 
       return {
 
-        onAddMessage(id, content) {
+        addMessage(id, content) {
           messages = messages.concat({
             id,
             content
@@ -128,7 +128,7 @@ describe('flux', () => {
 
         message: {
 
-          onAddMessage() {
+          addMessage() {
             store.setState({
               id: store.state.id + 1
             });
@@ -145,7 +145,7 @@ describe('flux', () => {
 
       return {
 
-        onAddMessage(content) {
+        addMessage(content) {
           if (doesWaitFor) {
             store.waitFor('id');
           }
@@ -272,7 +272,7 @@ describe('flux', () => {
 
       return {
 
-        onAddMessage(cid, content) {
+        addMessage(cid, content) {
           store.setState({
             messages: store.state.messages.concat({
               cid: cid,
@@ -281,7 +281,7 @@ describe('flux', () => {
           });
         },
 
-        onAddMessageDone(cid, id) {
+        addMessageDone(cid, id) {
           const index = _.findIndex(store.state.messages, (message) => {
             return message.cid === cid;
           });
@@ -297,7 +297,7 @@ describe('flux', () => {
           store.setState(newState);
         },
 
-        onAddMessageFail(cid, error) {
+        addMessageFail(cid, error) {
           const newState = update(store.state, {
             errors: {
               $push: [error]

@@ -30,11 +30,10 @@ const createMessageStore = (store) => {
     messages: []
   });
 
-  // Return handlers to listen for dispatched actions. `onAddMessage` will
-  // listen for 'addMessage' actions.
+  // Return handlers to listen for dispatched actions.
   return {
 
-    onAddMessage(content) {
+    addMessage(content) {
       // Using `setState` will automatically cause the store to emit a change
       // event.
       store.setState({
@@ -90,7 +89,7 @@ const createStore = (store) => {
 
   return {
 
-    onAddMessage(cid, content) {
+    addMessage(cid, content) {
       store.setState({
         messages: store.state.messages.concat({
           cid: cid,
@@ -154,7 +153,7 @@ const setupMessageStore = (store) => {
 
   return {
 
-    onAddMessage(cid, content) {
+    addMessage(cid, content) {
       store.setState({
         messages: store.state.messages.concat({
           cid: cid,
@@ -163,7 +162,7 @@ const setupMessageStore = (store) => {
       });
     },
 
-    onAddMessageDone(cid, id) {
+    addMessageDone(cid, id) {
       const index = _.findIndex(store.state.messages, (message) => {
         return message.cid === cid;
       });
@@ -179,7 +178,7 @@ const setupMessageStore = (store) => {
       store.setState(newState);
     },
 
-    onAddMessageFail(cid, error) {
+    addMessageFail(cid, error) {
       const newState = update(store.state, {
         errors: {
           $push: [error]
