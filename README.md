@@ -112,3 +112,88 @@ flux.stores.message.on('change', (state) => {
   console.log('Messages:', state.messages);
 });
 ```
+
+## Async
+
+Implicit actions make it pretty easy to do async while explicit dispatch still
+makes it really clear. If your success and error action creators are just
+pass-through, no need to specify them.
+
+```js
+import SomeDataService from '../some-data-service';
+
+const messageActions = {
+
+  addMessage(dispatch, content) {
+    const cid = (new Date()).getTime();
+    // Do the optimistic dispatch.
+    dispatch(cid, content);
+    SomeDataService.addMessage(content)
+      .then((result) => {
+        // Dispatch for success.
+        dispatch.actions.addMessageDone(cid, result.id);
+      })
+      .catch((error) => {
+        // Dispatch for failure.
+        dispatch.actions.addMessageFail(cid, error);
+      });
+  }
+};
+
+const setupMessageStore = (store) => {
+
+  store.setState({
+    messages: [],
+    errors: []
+  });
+
+  return {
+
+    onAddMessage(cid, content) {
+      store.setState({
+        messages: store.state.messages.concat({
+          cid: cid,
+          content: content
+        })
+      });
+    },
+
+    onAddMessageDone(cid, id) {
+      const index = _.findIndex(store.state.messages, (message) => {
+        return message.cid === cid;
+      });
+
+      const newState = update(store.state, {
+        messages: {
+          [index]: {
+            id: {$set: id}
+          }
+        }
+      });
+
+      store.setState(newState);
+    },
+
+    onAddMessageFail(cid, error) {
+      const newState = update(store.state, {
+        errors: {
+          $push: [error]
+        }
+      });
+
+      store.setState(newState);
+    }
+  };
+};
+
+const flux = Flux.create({
+  actions: {
+    message: messageActions
+  },
+  stores: {
+    message: setupMessageStore
+  }
+});
+
+flux.actions.message.addMessage('Hey, that was pretty easy!');
+```
