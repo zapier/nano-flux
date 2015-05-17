@@ -114,9 +114,9 @@ const flux = Flux.create({
 flux.stores.message.on('change', (state) => {
   console.log('Messages:', state.messages);
 });
-```
 
 flux.actions.message.addMessage('Hello, world!');
+```
 
 ## Async
 
