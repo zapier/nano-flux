@@ -56,10 +56,10 @@ const flux = Flux.create({
 flux.stores.message.on('change', (state) => {
   console.log('Messages:', state.messages);
 });
-```
 
 // Dispatch an action.
 flux.actions.message.addMessage('Hello, world!');
+```
 
 ## Explicit actions
 
