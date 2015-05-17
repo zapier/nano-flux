@@ -58,6 +58,9 @@ flux.stores.message.on('change', (state) => {
 });
 ```
 
+// Dispatch an action.
+flux.actions.message.addMessage('Hello, world!');
+
 ## Explicit actions
 
 If your action needs to do a bit of work before dispatching, it's easy to add
@@ -112,6 +115,8 @@ flux.stores.message.on('change', (state) => {
   console.log('Messages:', state.messages);
 });
 ```
+
+flux.actions.message.addMessage('Hello, world!');
 
 ## Async
 
