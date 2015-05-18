@@ -212,7 +212,8 @@ Higher-order component to listen to stores and pass state to a wrapped
 component.
 
 ```js
-import connectToStores from 'nano-flux/addons/connect-to-stores';
+import Flux from 'nano-flux/addons';
+import Message from './message';
 
 const Messages = React.createClass({
   render() {
@@ -226,7 +227,7 @@ const Messages = React.createClass({
   }
 });
 
-const ConnectedMessages = connectToStores(Messages, ['message'], (stores, props) => {
+const ConnectedMessages = Flux.addons.connectToStores(Messages, ['message'], (stores, props) => {
   return {
     messages: stores.message.state.messages
   };
@@ -239,7 +240,8 @@ Higher-order component to pass actions to a wrapped component. Use with
 connectToStores to remove the need to pass around the flux object at all.
 
 ```js
-import connectToStores from 'nano-flux/addons/inject-actions';
+import Flux from 'nano-flux/addons';
+import Message from './message';
 
 const Messages = React.createClass({
   render() {
@@ -253,13 +255,13 @@ const Messages = React.createClass({
   }
 });
 
-const ConnectedMessages = connectToStores(Messages, ['message'], (stores, props) => {
+const ConnectedMessages = Flux.addons.connectToStores(Messages, ['message'], (stores, props) => {
   return {
     messages: stores.message.state.messages
   };
 });
 
-const ActionMessages = injectActions(ConnectedMessages, ['message'], (actions) => {
+const ActionMessages = Flux.addons.injectActions(ConnectedMessages, ['message'], (actions) => {
   return actions.message;
 });
 ```
