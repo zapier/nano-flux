@@ -1,14 +1,34 @@
-/* global describe, it */
+/* global describe, it, expect */
 
 import Flux from '../lib/flux';
-import chai from 'chai';
 import React from 'react/addons';
 import _ from 'lodash';
-require('es6-promise').polyfill();
 
 const update = React.addons.update;
 
-const expect = chai.expect;
+// Fake sync Promise. Stupid jest with old jasmine. Yuck.
+const StupidSyncPromise = {
+  resolve(value) {
+    return {
+      then(cb) {
+        const newValue = cb(value);
+        return StupidSyncPromise.resolve(newValue);
+      },
+      catch() {}
+    };
+  },
+  reject(err) {
+    return {
+      then() {
+        return StupidSyncPromise.reject(err);
+      },
+      catch(cb) {
+        const newValue = cb(err);
+        return StupidSyncPromise.resolve(newValue);
+      }
+    };
+  }
+};
 
 describe('flux', () => {
 
@@ -17,7 +37,7 @@ describe('flux', () => {
     const flux = Flux.create();
 
     // Dispatcher exposed in case you need it.
-    expect(flux.dispatcher).to.be.an('object');
+    expect(typeof flux.dispatcher).toEqual('object');
 
   });
 
@@ -52,7 +72,7 @@ describe('flux', () => {
 
     flux.actions.message.addMessage('Hello, world!');
 
-    expect(state).to.deep.equal({messages: ['Hello, world!']});
+    expect(state).toEqual({messages: ['Hello, world!']});
 
   });
 
@@ -103,7 +123,7 @@ describe('flux', () => {
 
     flux.actions.message.addMessage('Hello, world!');
 
-    expect(state).to.deep.equal({
+    expect(state).toEqual({
       messages: [
         {
           id: 1,
@@ -183,7 +203,7 @@ describe('flux', () => {
 
     flux.actions.message.addMessage('Hello, world!');
 
-    expect(state).to.deep.equal({
+    expect(state).toEqual({
       messages: [
         {
           id: 0,
@@ -206,7 +226,7 @@ describe('flux', () => {
 
     flux.actions.message.addMessage('Hello, world!');
 
-    expect(state).to.deep.equal({
+    expect(state).toEqual({
       messages: [
         {
           id: 1,
@@ -226,14 +246,14 @@ describe('flux', () => {
       addMessage(content) {
 
         if (typeof content !== 'string') {
-          return Promise.reject({
+          return StupidSyncPromise.reject({
             type: 'invalid_content'
           });
         }
 
         id++;
 
-        return Promise.resolve({
+        return StupidSyncPromise.resolve({
           id: id
         });
       }
@@ -242,9 +262,7 @@ describe('flux', () => {
 
   };
 
-  it('should delegate actions for async', function (done) {
-
-    this.timeout(100);
+  it('should delegate actions for async', () => {
 
     const data = createData();
 
@@ -328,14 +346,13 @@ describe('flux', () => {
       if (newState.errors.length > 0) {
         didError = true;
       }
-      if (didAddMessage && didError) {
-        done();
-      }
     });
 
     flux.actions.message.addMessage('Hello, world!');
     flux.actions.message.addMessage(0);
 
+    expect(didAddMessage).toBe(true);
+    expect(didError).toBe(true);
   });
 
 });
