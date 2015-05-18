@@ -250,7 +250,7 @@ const Messages = React.createClass({
         })}
       </ul>
     )
-  }gi
+  }
 });
 
 const ConnectedMessages = connectToStores(Messages, ['message'], (stores, props) => {
