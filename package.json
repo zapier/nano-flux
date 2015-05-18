@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "babel lib --out-dir build"
+    "build": "babel lib --out-dir build",
+    "publish": "npm run build && npm publish"
   },
   "author": "Justin Deal <justin.deal@gmail.com>",
   "license": "ISC",

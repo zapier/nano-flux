@@ -145,20 +145,17 @@ var NanoFlux = {
       var actionsKey = _ref.actionsKey;
       var actionKey = _ref.actionKey;
 
-      // Action key, but with 'on' prefix.
-      var onActionKey = 'on' + actionKey[0].toUpperCase() + '' + actionKey.substring(1);
-
       if (storeKey === actionsKey) {
 
-        if (handlers[onActionKey]) {
-          return handlers[onActionKey];
+        if (handlers[actionKey]) {
+          return handlers[actionKey];
         }
       }
 
       if (handlers[actionsKey]) {
 
-        if (handlers[actionsKey][onActionKey]) {
-          return handlers[actionsKey][onActionKey];
+        if (handlers[actionsKey][actionKey]) {
+          return handlers[actionsKey][actionKey];
         }
       }
 
@@ -171,29 +168,22 @@ var NanoFlux = {
 
       Object.keys(handlers).forEach(function (key) {
         if (typeof handlers[key] === 'function') {
-          (function () {
-            if (!actions[actionsKey]) {
-              actions[actionsKey] = {};
-            }
-            var actionKey = key;
-            // Reverse the `on` prefix.
-            if (key.substring(0, 2) === 'on' && key[2].toUpperCase() === key[2]) {
-              actionKey = key[2].toLowerCase() + key.substring(3);
-            }
-            if (!actions[actionsKey][actionKey]) {
-              actions[actionsKey][actionKey] = function () {
-                for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-                  args[_key3] = arguments[_key3];
-                }
+          if (!actions[actionsKey]) {
+            actions[actionsKey] = {};
+          }
+          if (!actions[actionsKey][key]) {
+            actions[actionsKey][key] = function () {
+              for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                args[_key3] = arguments[_key3];
+              }
 
-                dispatcher.dispatch({
-                  actionsKey: actionsKey,
-                  actionKey: actionKey,
-                  args: args
-                });
-              };
-            }
-          })();
+              dispatcher.dispatch({
+                actionsKey: actionsKey,
+                actionKey: key,
+                args: args
+              });
+            };
+          }
         } else if (typeof handlers[key] === 'object') {
           // If we have an object, the key refers to a different store, so
           // recurse to look for those.
@@ -214,6 +204,7 @@ var NanoFlux = {
       // Get all the handlers for the store.
       var handlers = setupFn(privateStore);
       // Now state transitions can fire events.
+      publicStore.state = privateStore.state;
       privateStore.activateSetState();
 
       // Get a dispatch token for this store and register for actions.
