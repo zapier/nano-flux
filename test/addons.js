@@ -2,6 +2,7 @@
 
 import Flux from '../lib/flux';
 import connectToStores from '../lib/addons/connect-to-stores';
+import injectActions from '../lib/addons/inject-actions';
 import React from 'react/addons';
 require('es6-promise').polyfill();
 const TestUtils = React.addons.TestUtils;
@@ -32,7 +33,8 @@ describe('flux', () => {
 
   const MessageApp = class extends React.Component {
     render() {
-      return <div>{ this.props.messages.length }</div>;
+      expect(typeof this.props.addMessage).toEqual('function');
+      return <div onClick={this.props.addMessage}>{ this.props.messages.length }</div>;
     }
   };
 
@@ -43,10 +45,14 @@ describe('flux', () => {
     };
   });
 
-  it('should pass state to component', (done) => {
+  const InjectedMessageApp = injectActions(ConnectedMessageApp, ['message'], (actions) => {
+    return actions.message;
+  });
+
+  it('should pass state to component', () => {
 
     const renderedComponent = TestUtils.renderIntoDocument(
-      <ConnectedMessageApp flux={flux} testValue="foo"/>
+      <InjectedMessageApp flux={flux} testValue="foo"/>
     );
 
     var component = TestUtils.findRenderedDOMComponentWithTag(
@@ -58,8 +64,9 @@ describe('flux', () => {
 
     expect(div.innerHTML).toEqual('0');
 
-    flux.actions.message.addMessage('Hello!');
+    TestUtils.Simulate.click(div);
     expect(div.innerHTML).toEqual('1');
+
   });
 
 });
