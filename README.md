@@ -3,7 +3,7 @@
 Just a tiny wrapper around Facebook's flux dispatcher.
 
 - Hardly any code.
-- No classes, no use of `this`. Actions creators are just functions. Stores are
+- No classes, no use of `this`. Action creators are just functions. Stores are
   simple factory functions that return handlers.
 - No need to specify action creators that just pass through to store handlers.
   Having a store that specifies a handler implies an action creator that
