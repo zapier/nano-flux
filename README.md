@@ -204,7 +204,7 @@ const flux = Flux.create({
 flux.actions.message.addMessage('Hey, that was pretty easy!');
 ```
 
-## addons
+## Add-ons
 
 ### connectToStores
 
@@ -250,7 +250,7 @@ const Messages = React.createClass({
         })}
       </ul>
     )
-  }
+  }gi
 });
 
 const ConnectedMessages = connectToStores(Messages, ['message'], (stores, props) => {
