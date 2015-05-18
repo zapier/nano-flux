@@ -12,7 +12,9 @@ Just a tiny wrapper around Facebook's flux dispatcher.
   creators and wraps them up in a flux instance for you. Nice for testing or
   isomorphic apps or just plain clean code.
 
-## Implicit actions
+## Examples
+
+### Implicit actions
 
 If your action is just passing through to the store, you can forget all the
 boilerplate!
@@ -60,7 +62,7 @@ flux.stores.message.on('change', (state) => {
 flux.actions.message.addMessage('Hello, world!');
 ```
 
-## Explicit actions
+### Explicit actions
 
 If your action needs to do a bit of work before dispatching, it's easy to add
 explict action creators.
@@ -117,7 +119,7 @@ flux.stores.message.on('change', (state) => {
 flux.actions.message.addMessage('Hello, world!');
 ```
 
-## Async
+### Async
 
 Implicit actions make it pretty easy to do async while explicit dispatch still
 makes it really clear. If your success and error action creators are just
@@ -200,4 +202,64 @@ const flux = Flux.create({
 });
 
 flux.actions.message.addMessage('Hey, that was pretty easy!');
+```
+
+## addons
+
+### connectToStores
+
+Higher-order component to listen to stores and pass state to a wrapped
+component.
+
+```js
+import connectToStores from 'nano-flux/addons/connect-to-stores';
+
+const Messages = React.createClass({
+  render() {
+    return (
+      <ul>
+        {this.props.messages.map((message) => {
+          return <Message message={message}/>;
+        })}
+      </ul>
+    )
+  }
+});
+
+const ConnectedMessages = connectToStores(Messages, ['message'], (stores, props) => {
+  return {
+    messages: stores.message.state.messages
+  };
+});
+```
+
+### injectActions
+
+Higher-order component to pass actions to a wrapped component. Use with
+connectToStores to remove the need to pass around the flux object at all.
+
+```js
+import connectToStores from 'nano-flux/addons/inject-actions';
+
+const Messages = React.createClass({
+  render() {
+    return (
+      <ul>
+        {this.props.messages.map((message) => {
+          return <Message message={message}/>;
+        })}
+      </ul>
+    )
+  }
+});
+
+const ConnectedMessages = connectToStores(Messages, ['message'], (stores, props) => {
+  return {
+    messages: stores.message.state.messages
+  };
+});
+
+const ActionMessages = injectActions(ConnectedMessages, ['message'], (actions) => {
+  return actions.message;
+});
 ```
