@@ -136,6 +136,8 @@ const setupIdStore = (store) => {
 
   return {
 
+    // This wrapping key signifies that the action is coming from the "message"
+    // actions namespace rather than the "id" namespace.
     message: {
 
       addMessage() {
