@@ -1,6 +1,6 @@
 # NanoFlux
 
-Just a tiny wrapper around Facebook's flux dispatcher.
+Just a tiny, simple wrapper around Facebook's flux dispatcher.
 
 - Hardly any code.
 - No classes, no use of `this`. Action creators are just functions. Stores are

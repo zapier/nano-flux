@@ -1,14 +1,14 @@
 {
   "name": "nano-flux",
   "version": "0.0.7",
-  "description": "",
+  "description": "Tiny, simple wrapper around Facebook's Flux library.",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "build": "babel lib --out-dir build"
   },
   "author": "Justin Deal <justin.deal@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "eventemitter3": "^1.1.0",
     "flux": "^2.0.3",

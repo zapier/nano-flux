@@ -53,11 +53,11 @@ var NanoFlux = {
         })();
       }
 
-      // Call the setup function to get the action creator functions.
-      var actionCreators = setupFn();
-
       // Add the namespace to the registry.
       actions[actionsKey] = {};
+
+      // Call the setup function to get the action creator functions.
+      var actionCreators = setupFn(actions[actionsKey]);
 
       // Add each action creator to the registry.
       Object.keys(actionCreators).forEach(function (actionKey) {
