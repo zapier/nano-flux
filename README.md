@@ -119,6 +119,66 @@ flux.stores.message.on('change', (state) => {
 flux.actions.message.addMessage('Hello, world!');
 ```
 
+### waitFor
+
+To wait for another store, use `store.waitFor(storeKey)`. You can also read the
+state of another store via `store.stores[storeKey].state`.
+
+Here's a silly example where the message store is dependent on an id store to
+create the ids.
+
+```js
+const setupIdStore = (store) => {
+
+  store.setState({
+    id: 0
+  });
+
+  return {
+
+    message: {
+
+      addMessage() {
+        store.setState({
+          id: store.state.id + 1
+        });
+      }
+    }
+  };
+};
+
+const setupMessageStore = (store) => {
+
+  store.setState({
+    messages: []
+  });
+
+  return {
+
+    addMessage(content) {
+      if (doesWaitFor) {
+        // Here we wait for the "id" store to finish.
+        store.waitFor('id');
+      }
+      store.setState({
+        messages: store.state.messages.concat({
+          // Peeking at the (read-only) state of the "id" store.
+          id: store.stores.id.state.id,
+          content: content
+        })
+      });
+    }
+  };
+};
+
+const flux = Flux.create({
+  stores: {
+    message: setupMessageStore,
+    id: setupIdStore
+  }
+});
+```
+
 ### Async
 
 Implicit actions make it pretty easy to do async while explicit dispatch still
