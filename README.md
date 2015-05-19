@@ -292,6 +292,8 @@ const ConnectedMessages = Flux.addons.connectToStores(Messages, ['message'], (st
     messages: stores.message.state.messages
   };
 });
+
+React.render(<ConnectedMessages flux={flux}/>);
 ```
 
 ### injectActions
@@ -306,11 +308,14 @@ import Message from './message';
 const Messages = React.createClass({
   render() {
     return (
-      <ul>
-        {this.props.messages.map((message) => {
-          return <Message message={message}/>;
-        })}
-      </ul>
+      <div>
+        <ul>
+          {this.props.messages.map((message) => {
+            return <Message message={message}/>;
+          })}
+        </ul>
+        <button onClick={this.props.addMessage}>Add Message</button>
+      </div>
     )
   }
 });
@@ -324,4 +329,6 @@ const ConnectedMessages = Flux.addons.connectToStores(Messages, ['message'], (st
 const ActionMessages = Flux.addons.injectActions(ConnectedMessages, ['message'], (actions) => {
   return actions.message;
 });
+
+React.render(<ActionMessages flux={flux}/>);
 ```
