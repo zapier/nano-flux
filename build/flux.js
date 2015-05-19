@@ -31,6 +31,13 @@ var NanoFlux = {
     var stores = {};
     // Registry of action creators.
     var actions = {};
+    // Emitter for listening to flux events.
+    var fluxEmitter = new _eventemitter32['default']();
+
+    var fluxDispatch = function fluxDispatch(payload) {
+      dispatcher.dispatch(payload);
+      fluxEmitter.emit('dispatch', payload);
+    };
 
     // Setup action creators, given a namespace and setup function.
     var setupActions = function setupActions(actionsKey, setupFn) {
@@ -61,7 +68,7 @@ var NanoFlux = {
             args[_key] = arguments[_key];
           }
 
-          dispatcher.dispatch({
+          fluxDispatch({
             actionsKey: actionsKey,
             actionKey: actionKey,
             args: args
@@ -177,7 +184,7 @@ var NanoFlux = {
                 args[_key3] = arguments[_key3];
               }
 
-              dispatcher.dispatch({
+              fluxDispatch({
                 actionsKey: actionsKey,
                 actionKey: key,
                 args: args
@@ -236,7 +243,10 @@ var NanoFlux = {
     return {
       dispatcher: dispatcher,
       stores: stores,
-      actions: actions
+      actions: actions,
+      on: fluxEmitter.on.bind(fluxEmitter),
+      off: fluxEmitter.off.bind(fluxEmitter),
+      once: fluxEmitter.once.bind(fluxEmitter)
     };
   }
 

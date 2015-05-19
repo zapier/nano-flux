@@ -76,6 +76,29 @@ describe('flux', () => {
 
   });
 
+  it('should emit dispatch events', () => {
+
+    const setupMessageStore = () => {
+      return {
+        addMessage() {}
+      };
+    };
+
+    const flux = Flux.create({
+      stores: {
+        message: setupMessageStore
+      }
+    });
+
+    flux.on('dispatch', (action) => {
+      expect(action.actionsKey).toEqual('message');
+      expect(action.actionKey).toEqual('addMessage');
+      expect(action.args).toEqual(['Hello!']);
+    });
+
+    flux.actions.message.addMessage('Hello!');
+  });
+
   it('should create flux instance with a store and explicit actions', () => {
 
     let uniqueId = 0;
