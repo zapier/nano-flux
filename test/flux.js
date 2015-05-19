@@ -157,6 +157,68 @@ describe('flux', () => {
 
   });
 
+  it('should allow actions to be a factory function', () => {
+
+    let uniqueId = 0;
+
+    const setupMessageActions = (actions) => ({
+
+      addMessage(dispatch, content) {
+        actions.reallyAddMessage(content);
+      },
+
+      reallyAddMessage(dispatch, content) {
+        uniqueId++;
+        dispatch(uniqueId, content);
+      }
+    });
+
+    const setupMessageStore = (store) => {
+
+      let messages = [];
+
+      return {
+
+        reallyAddMessage(id, content) {
+          messages = messages.concat({
+            id,
+            content
+          });
+          store.setState({
+            messages
+          });
+        }
+      };
+    };
+
+    const flux = Flux.create({
+      actions: {
+        message: setupMessageActions
+      },
+      stores: {
+        message: setupMessageStore
+      }
+    });
+
+    let state = null;
+
+    flux.stores.message.on('change', (newState) => {
+      state = newState;
+    });
+
+    flux.actions.message.addMessage('Hello, world!');
+
+    expect(state).toEqual({
+      messages: [
+        {
+          id: 1,
+          content: 'Hello, world!'
+        }
+      ]
+    });
+
+  });
+
   // Just a helper to create a flux instance that can optional waitFor another
   // store.
   const createWaitForFlux = (doesWaitFor) => {
