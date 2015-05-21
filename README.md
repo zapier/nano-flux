@@ -128,7 +128,7 @@ Here's a silly example where the message store is dependent on an id store to
 create the ids.
 
 ```js
-const setupIdStore = (store) => {
+const createIdStore = (store) => {
 
   store.setState({
     id: 0
@@ -149,7 +149,7 @@ const setupIdStore = (store) => {
   };
 };
 
-const setupMessageStore = (store) => {
+const createMessageStore = (store) => {
 
   store.setState({
     messages: []
@@ -158,10 +158,8 @@ const setupMessageStore = (store) => {
   return {
 
     addMessage(content) {
-      if (doesWaitFor) {
-        // Here we wait for the "id" store to finish.
-        store.waitFor('id');
-      }
+      // Here we wait for the "id" store to finish.
+      store.waitFor('id');
       store.setState({
         messages: store.state.messages.concat({
           // Peeking at the (read-only) state of the "id" store.
@@ -175,8 +173,8 @@ const setupMessageStore = (store) => {
 
 const flux = Flux.create({
   stores: {
-    message: setupMessageStore,
-    id: setupIdStore
+    message: createMessageStore,
+    id: createIdStore
   }
 });
 ```
@@ -208,7 +206,7 @@ const messageActions = {
   }
 };
 
-const setupMessageStore = (store) => {
+const createMessageStore = (store) => {
 
   store.setState({
     messages: [],
@@ -259,11 +257,75 @@ const flux = Flux.create({
     message: messageActions
   },
   stores: {
-    message: setupMessageStore
+    message: createMessageStore
   }
 });
 
 flux.actions.message.addMessage('Hey, that was pretty easy!');
+```
+
+### Action creators from factories
+
+The examples above show the action creators as just functions in an object.
+You can also use a factory to create your action creators. This keeps the api
+more consistent. Just remember: if you start holding on to state inside the
+closure, you're probably cheating!
+
+```js
+import SomeDataService from '../some-data-service';
+
+const createMessageActions = (actions) => {
+
+  addMessage(dispatch, content) {
+    const cid = (new Date()).getTime();
+    // Do the optimistic dispatch.
+    dispatch(cid, content);
+    SomeDataService.addMessage(content)
+      .then((result) => {
+        // Dispatch for success.
+        actions.addMessageDone(cid, result.id);
+      })
+      .catch((error) => {
+        // Dispatch for failure.
+        actions.addMessageFail(cid, error);
+      });
+  }
+};
+
+const createMessageStore = (store) => {
+  ...
+};
+
+const flux = Flux.create({
+  actions: {
+    message: createMessageActions
+  },
+  stores: {
+    message: createMessageStore
+  }
+});
+```
+
+One benefit of this is it makes it easy to bind your actions to other
+dependencies, like a data service.
+
+```js
+const createMessageActions = (DataService, actions) => {
+  ...
+};
+
+const createMessageStore = (store) => {
+  ...
+};
+
+const flux = Flux.create({
+  actions: {
+    message: createMessageActions.bind(null, SomeDataService)
+  },
+  stores: {
+    message: createMessageStore
+  }
+});
 ```
 
 ## Add-ons
