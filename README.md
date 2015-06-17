@@ -16,8 +16,8 @@ Just a tiny, simple wrapper around Facebook's flux dispatcher.
 
 ### Implicit actions
 
-If your action is just passing through to the store, you can forget all the
-boilerplate!
+If all your actions are just passing through to the store, you can forget all the
+boilerplate! This is great for testing a store.
 
 ```js
 import Flux from 'nano-flux';
@@ -65,7 +65,8 @@ flux.actions.message.addMessage('Hello, world!');
 ### Explicit actions
 
 If your action needs to do a bit of work before dispatching, it's easy to add
-explict action creators.
+explict action creators. Note that if you define any action creators, no
+implicit ones will be created.
 
 ```js
 import Flux from 'nano-flux';
@@ -197,11 +198,11 @@ const messageActions = {
     SomeDataService.addMessage(content)
       .then((result) => {
         // Dispatch for success.
-        dispatch.actions.addMessageDone(cid, result.id);
+        dispatch.to.addMessageDone(cid, result.id);
       })
       .catch((error) => {
         // Dispatch for failure.
-        dispatch.actions.addMessageFail(cid, error);
+        dispatch.to.addMessageFail(cid, error);
       });
   }
 };

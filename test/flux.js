@@ -358,10 +358,10 @@ describe('flux', () => {
         dispatch(cid, content);
         data.addMessage(content)
           .then((result) => {
-            dispatch.actions.addMessageDone(cid, result.id);
+            dispatch.to.addMessageDone(cid, result.id);
           })
           .catch((error) => {
-            dispatch.actions.addMessageFail(cid, error);
+            dispatch.to.addMessageFail(cid, error);
           });
       }
     };
@@ -449,13 +449,9 @@ describe('flux', () => {
 
     const createMessageActions = () => ({
 
-      draftAddMessage(dispatch) {
-        dispatch.to.addMessage();
-      },
+      draftAddMessage: 'addMessage',
 
-      draftUpdateMessage(dispatch, attrs) {
-        dispatch.to.updateMessage(attrs);
-      },
+      draftUpdateMessage: 'updateMessage',
 
       saveUpdateMessage(dispatch, attrs) {
         dispatch.to.updateMessage(attrs);
