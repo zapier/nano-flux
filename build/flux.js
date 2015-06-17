@@ -31,6 +31,8 @@ var NanoFlux = {
     var stores = {};
     // Registry of action creators.
     var actions = {};
+    // Registry of dispatchers.
+    var dispatchers = {};
     // Emitter for listening to flux events.
     var fluxEmitter = new _eventemitter32['default']();
 
@@ -53,8 +55,12 @@ var NanoFlux = {
         })();
       }
 
-      // Add the namespace to the registry.
+      // Add the namespace to the actions registry.
       actions[actionsKey] = {};
+
+      // Create a map of all dispatchers for this namespace in case an action
+      // creator needs to dispatch a differently named action.
+      dispatchers[actionsKey] = {};
 
       // Call the setup function to get the action creator functions.
       var actionCreators = setupFn(actions[actionsKey]);
@@ -75,17 +81,50 @@ var NanoFlux = {
           });
         };
 
-        // Hang other actions off this dispatch functions in case the action
+        // Add this dispatcher to the list of dispatchers for this namespace.
+        dispatchers[actionsKey][actionKey] = dispatch;
+
+        // Hang other actions off this dispatch function in case the action
         // creator needs to dispatch other actions.
         dispatch.actions = actions[actionsKey];
+        dispatch.to = dispatchers[actionsKey];
+
+        var actionCreator = actionCreators[actionKey];
+        // Allow shortcut of true to mean self-dispatch.
+        if (actionCreator === true) {
+          actionCreator = function (myDispatch) {
+            var _myDispatch$to;
+
+            for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+              args[_key2 - 1] = arguments[_key2];
+            }
+
+            (_myDispatch$to = myDispatch.to)[actionKey].apply(_myDispatch$to, args);
+          };
+        }
+        // Allow shortcut of string to mean dispatch to that action.
+        if (typeof actionCreator === 'string') {
+          (function () {
+            var delegateActionName = actionCreator;
+            actionCreator = function (myDispatch) {
+              var _myDispatch$to2;
+
+              for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+                args[_key3 - 1] = arguments[_key3];
+              }
+
+              (_myDispatch$to2 = myDispatch.to)[delegateActionName].apply(_myDispatch$to2, args);
+            };
+          })();
+        }
 
         // The public action function gets bound to the custom dispatch function.
         actions[actionsKey][actionKey] = function () {
-          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
+          for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+            args[_key4] = arguments[_key4];
           }
 
-          actionCreators[actionKey].apply(actionCreators, [dispatch].concat(args));
+          actionCreator.apply(undefined, [dispatch].concat(args));
         };
       });
     };
@@ -173,15 +212,23 @@ var NanoFlux = {
     var addPlaceholderActions = function addPlaceholderActions(storeKey, handlers, actionsKey) {
       actionsKey = actionsKey || storeKey;
 
+      var canCreatePlaceholderActions = false;
+
+      if (!actions[actionsKey]) {
+        dispatchers[actionsKey] = {};
+        actions[actionsKey] = {};
+        // Only create placeholder actions if no actions were created for this namespace.
+        canCreatePlaceholderActions = true;
+      }
+
       Object.keys(handlers).forEach(function (key) {
         if (typeof handlers[key] === 'function') {
-          if (!actions[actionsKey]) {
-            actions[actionsKey] = {};
-          }
-          if (!actions[actionsKey][key]) {
-            actions[actionsKey][key] = function () {
-              for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-                args[_key3] = arguments[_key3];
+
+          // Make sure a dispatcher exists for this action.
+          if (!dispatchers[actionsKey][key]) {
+            var dispatch = function dispatch() {
+              for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+                args[_key5] = arguments[_key5];
               }
 
               fluxDispatch({
@@ -190,6 +237,23 @@ var NanoFlux = {
                 args: args
               });
             };
+            dispatchers[actionsKey][key] = dispatch;
+          }
+
+          // Create stub action if allowed.
+          if (canCreatePlaceholderActions) {
+            if (!actions[actionsKey][key]) {
+              (function () {
+                var dispatch = dispatchers[actionsKey][key];
+                actions[actionsKey][key] = function () {
+                  for (var _len6 = arguments.length, args = Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+                    args[_key6] = arguments[_key6];
+                  }
+
+                  dispatch.apply(undefined, args);
+                };
+              })();
+            }
           }
         } else if (typeof handlers[key] === 'object') {
           // If we have an object, the key refers to a different store, so
