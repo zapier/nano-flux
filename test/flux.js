@@ -358,10 +358,10 @@ describe('flux', () => {
         dispatch(cid, content);
         data.addMessage(content)
           .then((result) => {
-            dispatch.actions.addMessageDone(cid, result.id);
+            dispatch.to.addMessageDone(cid, result.id);
           })
           .catch((error) => {
-            dispatch.actions.addMessageFail(cid, error);
+            dispatch.to.addMessageFail(cid, error);
           });
       }
     };
@@ -438,6 +438,87 @@ describe('flux', () => {
 
     expect(didAddMessage).toBe(true);
     expect(didError).toBe(true);
+  });
+
+  it('should allow dispatching to other actions', () => {
+
+    let hitServerSaveCount = 0;
+    let hitServerUpdateCount = 0;
+
+    let nextServerId = 0;
+
+    const createMessageActions = () => ({
+
+      draftAddMessage: 'addMessage',
+
+      draftUpdateMessage: 'updateMessage',
+
+      saveUpdateMessage(dispatch, attrs) {
+        dispatch.to.updateMessage(attrs);
+        if (attrs.id) {
+          hitServerUpdateCount++;
+        } else {
+          hitServerSaveCount++;
+          nextServerId++;
+          dispatch.to.updateMessage({id: nextServerId, cid: attrs.cid});
+        }
+      }
+    });
+
+    const createMessageStore = (store) => {
+
+      let nextId = 0;
+
+      store.setState({
+        messages: {}
+      });
+
+      return {
+        addMessage() {
+          nextId++;
+
+          store.setState({
+            messages: _.assign({}, store.state.messages, {
+              [nextId]: {
+                cid: nextId,
+                content: ''
+              }
+            })
+          });
+        },
+
+        updateMessage(attrs) {
+          store.setState({
+            messages: _.assign({}, store.state.messages, {
+              [attrs.cid]: _.assign({}, store.state.messages[attrs.cid], attrs)
+            })
+          });
+        }
+      };
+    };
+
+    const flux = Flux.create({
+      actions: {
+        message: createMessageActions
+      },
+      stores: {
+        message: createMessageStore
+      }
+    });
+
+    flux.actions.message.draftAddMessage();
+
+    flux.actions.message.draftUpdateMessage({cid: 1, content: 'Hell'});
+    expect(flux.stores.message.state.messages).toEqual({1: {cid: 1, content: 'Hell'}});
+
+    flux.actions.message.saveUpdateMessage({cid: 1, content: 'Hello!'});
+    expect(flux.stores.message.state.messages).toEqual({1: {cid: 1, id: 1, content: 'Hello!'}});
+
+    flux.actions.message.saveUpdateMessage({cid: 1, id: 1, content: 'Hello again!'});
+    expect(flux.stores.message.state.messages).toEqual({1: {cid: 1, id: 1, content: 'Hello again!'}});
+
+    expect(hitServerSaveCount).toEqual(1);
+    expect(hitServerUpdateCount).toEqual(1);
   });
 
 });
