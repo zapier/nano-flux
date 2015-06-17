@@ -1,6 +1,6 @@
 {
   "name": "nano-flux",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Tiny, simple wrapper around Facebook's Flux library.",
   "main": "index.js",
   "scripts": {
