@@ -76,6 +76,41 @@ describe('flux', () => {
 
   });
 
+  it('should allow new state to be returned', () => {
+
+    const setupMessageStore = () => {
+
+      let messages = [];
+
+      return {
+
+        addMessage(content) {
+          messages = messages.concat(content);
+          return {
+            messages
+          };
+        }
+      };
+    };
+
+    const flux = Flux.create({
+      stores: {
+        message: setupMessageStore
+      }
+    });
+
+    let state = null;
+
+    flux.stores.message.on('change', (newState) => {
+      state = newState;
+    });
+
+    flux.actions.message.addMessage('Hello, world!');
+
+    expect(state).toEqual({messages: ['Hello, world!']});
+
+  });
+
   it('should emit dispatch events', () => {
 
     const setupMessageStore = () => {

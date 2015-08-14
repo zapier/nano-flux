@@ -284,7 +284,10 @@ var NanoFlux = {
         var handler = findHandler(handlers, storeKey, payload);
 
         if (handler) {
-          handler.apply(handlers, payload.args);
+          var newState = handler.apply(handlers, payload.args);
+          if (typeof newState !== 'undefined') {
+            privateStore.setState(newState);
+          }
         }
       });
 
