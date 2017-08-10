@@ -1,3 +1,5 @@
+*_This project is no longer maintained. If you are interested in taking over the project, email [contact@zapier.com](mailto:contact@zapier.com)_*
+
 # NanoFlux
 
 Just a tiny, simple wrapper around Facebook's flux dispatcher.
